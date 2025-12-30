@@ -7,6 +7,8 @@ import Shop from "./pages/Shop";
 import Blocked from "./pages/Blocked";
 import Register from "./pages/Register";
 import Checkout from "./pages/Checkout";  
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CartProvider } from "./contexts/CartContext";
 
 function SecurityTelemetry({ blocked }) {
   const location = useLocation();
@@ -62,16 +64,19 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <SecurityTelemetry blocked={blocked} />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/checkout" element={<Checkout />} />  
-      </Routes>
-    </BrowserRouter>
+    <CartProvider>
+      <BrowserRouter>
+        <SecurityTelemetry blocked={blocked} />
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+        </Routes>
+      </BrowserRouter>
+    </CartProvider>
   );
 }
 
