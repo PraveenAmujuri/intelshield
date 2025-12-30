@@ -1,23 +1,24 @@
 import { useState } from "react";
 import api from "../api/axios";
-import { useNavigate, Link } from "react-router-dom"; // Added Link
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
-  const [email, setEmail] = useState(""); // Using email as the input value
+  const [username, setUsername] = useState(""); // Renamed from email for clarity
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // FIX: Change 'email' to 'username' to match Backend Pydantic model
-      const { data } = await api.post("/auth/register", {
-  username: username.trim(),
-  password: password.normalize("NFKC").trim()
-});
+      // ✅ FIX 1: Use /auth/login (was /auth/register)
+      // ✅ FIX 2: Use 'username' key (was 'username: username' with missing var)
+      const { data } = await api.post("/auth/login", {
+        username: username.trim(),
+        password: password.normalize("NFKC").trim()
+      });
 
       localStorage.setItem("token", data.access_token);
-      localStorage.setItem("username", email); // Store username for AI tracking
+      localStorage.setItem("username", username); 
       navigate("/shop");
     } catch (err) { 
       console.error(err.response?.data);
@@ -30,10 +31,10 @@ export default function Login() {
       <form onSubmit={handleLogin}>
         <h2>Login to Sandbox</h2>
         <input 
-          type="text" // Changed from email to text for flexibility
-          placeholder="Username / Email" 
-          value={email}
-          onChange={e => setEmail(e.target.value)} 
+          type="text" 
+          placeholder="Username" 
+          value={username}
+          onChange={e => setUsername(e.target.value)} 
           style={{ display: "block", margin: "10px 0", width: "100%" }}
           required 
         />
