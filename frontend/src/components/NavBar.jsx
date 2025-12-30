@@ -21,6 +21,16 @@ export default function NavBar() {
             <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Authorized Agent</span>
             <span className="text-sm text-white font-mono">{username || "GUEST_USER"}</span>
           </div>
+          <div className="relative">
+  <Link to="/cart" className="p-2 hover:bg-white/10 rounded-xl transition-all">
+    <span className="text-2xl">🛒</span>
+    {totalItems > 0 && (
+      <span className="absolute -top-2 -right-2 bg-red-600 text-xs w-6 h-6 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+        {totalItems}
+      </span>
+    )}
+  </Link>
+</div>
           <button 
             onClick={handleLogout}
             className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400 hover:text-white transition-all"
