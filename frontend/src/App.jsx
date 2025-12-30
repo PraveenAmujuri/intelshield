@@ -1,16 +1,16 @@
 import throttle from "lodash.throttle";
-import { BrowserRouter as Router, Routes, Route, useLocation, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { socket } from "./socket/socket";
 import { CartProvider } from "./contexts/CartContext";
-import NavBar from "./components/NavBar";  // ✅ ADD
+import NavBar from "./components/NavBar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Shop from "./pages/Shop";
 import CartPage from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Blocked from "./pages/Blocked";
-import Admin from "./pages/Admin";  // ✅ ADD
+import Admin from "./pages/Admin";
 
 function SecurityTelemetry({ blocked }) {
   const location = useLocation();
@@ -62,16 +62,18 @@ function AppContent() {
   return (
     <>
       <NavBar />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<Login />} />
-      </Routes>
+      <main className="min-h-screen">
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<Login />} /> {/* ✅ CATCH-ALL */}
+        </Routes>
+      </main>
     </>
   );
 }
@@ -79,7 +81,7 @@ function AppContent() {
 function App() {
   return (
     <CartProvider>
-      <Router>
+      <Router basename={import.meta.env.DEV ? undefined : "/"}>
         <SecurityTelemetry blocked={false} />
         <AppContent />
       </Router>
