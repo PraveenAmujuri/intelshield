@@ -4,6 +4,7 @@ TRUSTED_DOMAINS = {
     "localhost",
     "intelshield.com",
     "www.intelshield.com",
+    "is.praveenai.tech",
 }
 
 SUSPICIOUS_LOGIN_PARAMS = {
