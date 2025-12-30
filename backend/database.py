@@ -4,12 +4,9 @@ import certifi
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 
-# Load environment variables
 load_dotenv()
 
-# Secure MongoDB URI
 MONGO_URI = os.getenv("MONGO_URI")
-
 if not MONGO_URI:
     raise RuntimeError("❌ MONGO_URI is not set in environment variables")
 
@@ -21,12 +18,13 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
 database = client["intelshield"]
 user_collection = database["users_collection"]
 
-# Password hashing
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    truncate_error=False
-)
+# ✅ THE FIXED RENDER CONFIGURATION:
+# 1. Initialize with a clean context to avoid the 'backend' KeyError
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# 2. Use .update() to force the 'builtin' backend.
+# This bypasses the broken system 'bcrypt' library and silences version warnings.
+pwd_context.update(bcrypt__backend="builtin") 
 
 def user_helper(user) -> dict:
     return {
