@@ -49,7 +49,7 @@ async def login(user: UserIn):
 
 # ------------------ ADMIN AUTH ------------------
 ADMIN_CREDENTIALS = {
-    "admin": "intelshield2025"  # Change this in production!
+    "admin": "admin1"  # Change this in production!
 }
 
 @router.post("/admin-login")
