@@ -28,6 +28,16 @@ export default function NavBar() {
               </span>
             )}
           </Link>
+            // Add this button in NavBar (after cart badge):
+{localStorage.getItem("admin_token") ? (
+  <Link to="/admin" className="p-2 relative hover:bg-red-600/50 rounded-xl transition-all">
+    <span className="text-xl">🔴</span>
+  </Link>
+) : (
+  <Link to="/admin" className="p-2 hover:bg-white/10 rounded-xl transition-all">
+    <span className="text-lg">👮</span>
+  </Link>
+)}
 
           <div className="hidden md:flex flex-col items-end">
             <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Authorized Agent</span>
