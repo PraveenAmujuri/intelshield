@@ -61,7 +61,7 @@ function AppContent() {
   return (
     <>
       <NavBar />
-      <main className="min-h-screen">
+      <main className="min-h-screen pt-20">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
@@ -80,7 +80,7 @@ function AppContent() {
 function App() {
   return (
     <CartProvider>
-      <Router>  {/* ✅ NO basename */}
+      <Router>
         <SecurityTelemetry blocked={false} />
         <AppContent />
       </Router>
