@@ -10,11 +10,12 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      // Sends data to your MongoDB-backed FastAPI route
-      await api.post("/auth/login", {
-  username: email.trim(),
-  password: password.normalize("NFKC").trim()
-});
+      // ✅ FIX 1: Use /auth/register (was /auth/login)
+      // ✅ FIX 2: Send 'username' (was sending 'email' which was undefined)
+      await api.post("/auth/register", {
+        username: username.trim(),
+        password: password.normalize("NFKC").trim()
+      });
 
       alert("Account created in Cloud! Now Login.");
       navigate("/login");
@@ -30,6 +31,7 @@ export default function Register() {
         <input 
           type="text" 
           placeholder="Create Username" 
+          value={username}
           onChange={e => setUsername(e.target.value)} 
           style={{ display: "block", margin: "10px 0", width: "100%" }}
           required 
@@ -37,6 +39,7 @@ export default function Register() {
         <input 
           type="password" 
           placeholder="Create Password" 
+          value={password}
           onChange={e => setPassword(e.target.value)} 
           style={{ display: "block", margin: "10px 0", width: "100%" }}
           required 
