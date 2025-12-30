@@ -1,14 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from "../contexts/CartContext";  // ✅ ADD THIS
+import { useCart } from "../contexts/CartContext";
 
 export default function NavBar() {
   const navigate = useNavigate();
-  const username = localStorage.getItem("username") || "GUEST/USER";
-  const { totalItems } = useCart();  // ✅ ADD THIS
+  const { totalItems } = useCart();
+  const username = localStorage.getItem("username");
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/login");
+    // ✅ Use location.href to force the UI to hide the NavBar immediately
+    window.location.href = "/login";
   };
 
   return (
@@ -19,27 +20,17 @@ export default function NavBar() {
         </Link>
         
         <div className="flex items-center gap-6">
-          {/* 🛒 CART BADGE */}
           <Link to="/cart" className="relative p-2 hover:bg-white/10 rounded-xl transition-all group">
             <span className="text-2xl">🛒</span>
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-xs w-5 h-5 rounded-full flex items-center justify-center text-white font-bold shadow-lg animate-pulse">
+              <span className="absolute -top-1 -right-1 bg-red-600 text-[10px] w-5 h-5 rounded-full flex items-center justify-center text-white font-bold animate-pulse">
                 {totalItems}
               </span>
             )}
           </Link>
-{localStorage.getItem("admin_token") ? (
-  <Link to="/admin" className="p-2 relative hover:bg-red-600/50 rounded-xl transition-all">
-    <span className="text-xl">🔴</span>
-  </Link>
-) : (
-  <Link to="/admin" className="p-2 hover:bg-white/10 rounded-xl transition-all">
-    <span className="text-lg">👮</span>
-  </Link>
-)}
 
           <div className="hidden md:flex flex-col items-end">
-            <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Authorized Agent</span>
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Authorized Agent</span>
             <span className="text-sm text-white font-mono">{username}</span>
           </div>
           
