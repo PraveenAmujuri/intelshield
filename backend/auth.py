@@ -1,10 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from database import user_collection, get_password_hash, verify_password
-import jwt  # For admin token
+import jwt
 import time
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
+# ✅ SHARED STATE - NO CIRCULAR IMPORTS
+sessions = {}
 
 class UserIn(BaseModel):
     username: str
@@ -43,24 +46,12 @@ async def login(user: UserIn):
 
     return {
         "message": "Login successful",
-        "access_token": "user_jwt_" + str(time.time()),  # Simple token
+        "access_token": f"user_jwt_{int(time.time())}",
         "username": user.username
-    }
-# ADD at top:
-from main import sessions  # ✅ Import sessions
-
-@router.get("/admin/alerts")
-async def get_admin_alerts():
-    return {
-        "alerts": [],
-        "active_sessions": len(sessions),  # ✅ Now works
-        "blocked_users": await user_collection.count_documents({"is_blocked": True})
     }
 
 # ------------------ ADMIN AUTH ------------------
-ADMIN_CREDENTIALS = {
-    "admin": "intelshield2025"  # Change this in production!
-}
+ADMIN_CREDENTIALS = {"admin": "intelshield2025"}
 
 @router.post("/admin-login")
 async def admin_login(user: UserIn):
@@ -70,18 +61,25 @@ async def admin_login(user: UserIn):
     token = jwt.encode({
         "username": user.username,
         "role": "admin",
-        "exp": time.time() + 3600  # 1 hour
+        "exp": time.time() + 3600
     }, "intelshield_secret", algorithm="HS256")
     
+    return {"access_token": token, "message": "Admin access granted"}
+
+# ------------------ ADMIN STATS ------------------
+@router.get("/admin/stats")
+async def admin_stats():
+    blocked_count = await user_collection.count_documents({"is_blocked": True})
+    total_users = await user_collection.count_documents({})
     return {
-        "access_token": token,
-        "message": "Admin access granted"
+        "total_users": total_users,
+        "blocked_users": blocked_count,
+        "active_users": total_users - blocked_count,
+        "active_sessions": len(sessions)
     }
 
-# ------------------ ADMIN ACTIONS ------------------
 @router.post("/admin/block-user")
 async def block_user(block_data: BlockUser):
-    # Admin auth check (in production, verify JWT)
     if not block_data.reason:
         raise HTTPException(status_code=400, detail="Reason required")
     
@@ -97,7 +95,7 @@ async def block_user(block_data: BlockUser):
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {"message": f"User {block_data.username} blocked: {block_data.reason}"}
+    return {"message": f"User {block_data.username} BLOCKED: {block_data.reason}"}
 
 @router.post("/admin/whitelist-user")
 async def whitelist_user(user: UserIn):
@@ -113,18 +111,8 @@ async def whitelist_user(user: UserIn):
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {"message": f"User {user.username} whitelisted"}
+    return {"message": f"User {user.username} WHITELISTED"}
 
-@router.get("/admin/alerts")
-async def get_admin_alerts():
-    # Return recent high-risk alerts (integrate with your sessions/alerts)
-    return {
-        "alerts": [],
-        "active_sessions": len(sessions),
-        "blocked_users": await user_collection.count_documents({"is_blocked": True})
-    }
-
-# ------------------ USER STATUS ------------------
 @router.get("/user/status/{username}")
 async def user_status(username: str):
     user = await user_collection.find_one({"username": username})
@@ -135,5 +123,5 @@ async def user_status(username: str):
         "username": user["username"],
         "is_blocked": user.get("is_blocked", False),
         "blocked_reason": user.get("blocked_reason", None),
-        "status": "BLOCKED" if user.get("is_blocked") else "ACTIVE"
+        "status": "🚫 BLOCKED" if user.get("is_blocked") else "✅ ACTIVE"
     }
