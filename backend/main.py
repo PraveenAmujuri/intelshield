@@ -1,10 +1,10 @@
 import numpy as np
 import joblib
 import socketio
-from fastapi import FastAPI, Request  # ✅ ADD Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from phishing_engine import calculate_phishing_risk
-from auth import router as auth_router
+from auth import router, sessions
 
 # ------------------ CONFIG ------------------
 CALIBRATION_POINTS = 60
@@ -15,7 +15,7 @@ TOTAL_RISK_BLOCK = 7
 # ------------------ INIT ------------------
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
 app = FastAPI()
-app.include_router(auth_router)
+app.include_router(router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,9 +32,6 @@ MODEL_PATH = os.path.join(BASE_DIR, "intelshield_complete_models.joblib")
 intelshield_models = joblib.load(MODEL_PATH)
 print(f"🧠 IntelShield loaded {len(intelshield_models)} models: {list(intelshield_models.keys())}")
 print("🚀 Multi-threat detection ACTIVE!")
-
-# ------------------ SESSION STATE ------------------
-sessions = {}
 
 # ------------------ SOCKET EVENTS ------------------
 @sio.event
@@ -68,7 +65,7 @@ async def phishing_signal(sid, data):
     if risk > 0:
         print(f"🦠 PHISHING ATTACK DETECTED | Risk={risk} | URL={data.get('url', 'unknown')}")
 
-# ------------------ BEHAVIOR PACKET (🚨 MAIN ATTACK LOGIC) ------------------
+# ------------------ BEHAVIOR PACKET ------------------
 @sio.event
 async def behavior_packet(sid, data):
     session = sessions.get(sid)
@@ -77,13 +74,12 @@ async def behavior_packet(sid, data):
         return
     
     action = data.get("action")
-    print(f"🧪 BEHAVIOR PACKET: {action} | Amount=₹{data.get('amount', 0)} | Items={data.get('items', 0)}")  # ✅ LOG ALL
+    print(f"🧪 BEHAVIOR PACKET: {action} | Amount=₹{data.get('amount', 0)} | Items={data.get('items', 0)}")
     
     if action == "FINAL_CHECKOUT_ATTEMPT":
         session["amount"] = data.get("amount", 1200)
-        print(f"💳 HIGH-RISK CHECKOUT: ₹{session['amount']}")  # ✅ CLEAR LOG
+        print(f"💳 HIGH-RISK CHECKOUT: ₹{session['amount']}")
         
-        # 🔥 FRAUD TRANSACTION CHECK
         try:
             fraud_features = intelshield_models['fraud_transaction_scaler'].transform([[session["amount"], data.get("timestamp", 0)]])
             fraud_score = intelshield_models['fraud_transaction'].decision_function(fraud_features)[0]
@@ -98,9 +94,7 @@ async def behavior_packet(sid, data):
             print(f"Fraud check error: {e}")
 
     elif action == "ADD_TO_CART":
-        print(f"🛒 Cart add: {data.get('item_name')}")  # ✅ CART LOGS
-    elif action == "TEST_FRAUD":
-        print(f"🧪 MANUAL FRAUD TEST TRIGGERED!")
+        print(f"🛒 Cart add: {data.get('item_name')}")
 
 # ------------------ MOUSE BEHAVIOR (Bot Detection) ------------------
 @sio.event
@@ -111,7 +105,6 @@ async def mouse_move(sid, data):
     session["coords"].append([data["x"], data["y"]])
     if len(session["coords"]) < WINDOW: return
 
-    # Feature extraction (your existing code...)
     coords = np.array(session["coords"][-WINDOW:])
     dist = np.sqrt(np.sum(np.diff(coords, axis=0) ** 2, axis=1))
     total_dist = np.sum(dist)
@@ -119,7 +112,6 @@ async def mouse_move(sid, data):
     psi = displacement / total_dist if total_dist > 0 else 1.0
     jitter = np.std(dist)
 
-    # Calibration (your existing code...)
     if not session["calibrated"]:
         session["baseline"].append([psi, jitter])
         if len(session["baseline"]) >= CALIBRATION_POINTS:
@@ -130,7 +122,6 @@ async def mouse_move(sid, data):
             print(f"✅ {sid} calibrated!")
         return
 
-    # Behavioral model (your existing code...)
     try:
         feature_vector = intelshield_models['behavioral_scaler'].transform([[psi, jitter]])
         raw_score = intelshield_models['behavioral'].decision_function(feature_vector)[0]
@@ -139,7 +130,7 @@ async def mouse_move(sid, data):
 
     if raw_score < -0.15:
         session["risk"] += 1
-        print(f"🤖 BOT DETECTED {sid}: Score={raw_score:.4f} | Risk={session['risk']}")  # ✅ BOT LOG
+        print(f"🤖 BOT DETECTED {sid}: Score={raw_score:.4f} | Risk={session['risk']}")
     else:
         session["risk"] = max(session["risk"] - 1, 0)
 
@@ -163,16 +154,10 @@ async def test_fraud():
     return {"message": "💳 Fraud test triggered - high-risk transaction", "score": -0.5}
 
 @app.get("/api/threat-status")
-async def threat_status(request: Request):  # ✅ FIX: Add Request
+async def threat_status(request: Request):
     sid = request.headers.get("x-socket-id", "unknown")
     session = sessions.get(sid, {})
     return {
         "mouse_risk": session.get("risk", 0),
-        "phishing_risk": session.get("phishing_risk", 0),  # ✅ FIX: phishing_risk
-        "total_risk": session.get("risk", 0) + session.get("phishing_risk", 0),
-        "blocked": session.get("risk", 0) + session.get("phishing_risk", 0) > 7
-    }
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:sio_app", host="0.0.0.0", port=8000, reload=True)
+        "phishing_risk": session.get("phishing_risk", 0),
+        "total_risk": session.get("risk", 0) + session.get
