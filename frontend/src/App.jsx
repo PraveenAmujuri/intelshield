@@ -30,14 +30,18 @@ function SecurityTelemetry({ blocked }) {
   return null;
 }
 // App.jsx
+// App.jsx
 function AppContent() {
   const [blocked, setBlocked] = useState(false);
   const [reason, setReason] = useState("");
   const location = useLocation();
   
-  // ✅ Separate authentication checks
+  // ✅ Define these correctly to avoid ReferenceErrors
   const isUser = !!localStorage.getItem("token");
   const isAdmin = !!localStorage.getItem("admin_token");
+  
+  // ✅ This defines the variable your Routes are looking for
+  const isAuthenticated = isUser || isAdmin;
   
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/";
 
@@ -61,31 +65,31 @@ function AppContent() {
       window.removeEventListener("mousemove", handleMouseMove);
       socket.off("security_lock");
     };
-  }, [blocked]);
+  }, [blocked, blocked]);
 
   if (blocked) return <Blocked reason={reason} />;
 
   return (
     <>
       {/* Show NavBar if either a user OR admin is logged in */}
-      {(isUser || isAdmin) && !isAuthPage && <NavBar />}
+      {isAuthenticated && !isAuthPage && <NavBar />}
       
       <main className="min-h-screen">
-<Routes>
-  <Route path="/" element={<Login />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/register" element={<Register />} />
-  
-  {/* Standard User Routes */}
-  <Route path="/shop" element={isAuthenticated ? <Shop /> : <Navigate to="/login" />} />
-  <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Navigate to="/login" />} />
-  <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" />} />
-  
-  {/* ✅ Public access to /admin so Admin.jsx can handle its own login state */}
-  <Route path="/admin" element={<Admin />} />
-  
-  <Route path="*" element={<Navigate to="/login" />} />
-</Routes>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* ✅ Now isAuthenticated is defined and works correctly */}
+          <Route path="/shop" element={isAuthenticated ? <Shop /> : <Navigate to="/login" />} />
+          <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Navigate to="/login" />} />
+          <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" />} />
+          
+          {/* ✅ Public access to /admin as requested */}
+          <Route path="/admin" element={<Admin />} />
+          
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
       </main>
     </>
   );
