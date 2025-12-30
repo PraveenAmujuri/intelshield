@@ -24,13 +24,5 @@ user_collection = database["users_collection"]
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
-    truncate_error=False   # 👈 keep strict
+    truncate_error=False  # 🔒 strict mode ON
 )
-
-# ------------------ HELPER ------------------
-def user_helper(user) -> dict:
-    return {
-        "id": str(user["_id"]),
-        "username": user["username"],
-        "is_blocked": user.get("is_blocked", False),
-    }
