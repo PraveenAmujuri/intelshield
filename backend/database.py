@@ -4,15 +4,14 @@ import certifi
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 
-# Load environment variables
+# ------------------ ENV ------------------
 load_dotenv()
 
-# Secure MongoDB URI
 MONGO_URI = os.getenv("MONGO_URI")
-
 if not MONGO_URI:
-    raise RuntimeError("❌ MONGO_URI is not set in environment variables")
+    raise RuntimeError("❌ MONGO_URI not set")
 
+# ------------------ DB ------------------
 client = motor.motor_asyncio.AsyncIOMotorClient(
     MONGO_URI,
     tlsCAFile=certifi.where()
@@ -21,13 +20,14 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
 database = client["intelshield"]
 user_collection = database["users_collection"]
 
-# Password hashing
+# ------------------ PASSWORD HASHING ------------------
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
-    truncate_error=False
+    truncate_error=False   # 👈 keep strict
 )
 
+# ------------------ HELPER ------------------
 def user_helper(user) -> dict:
     return {
         "id": str(user["_id"]),
