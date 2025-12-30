@@ -2,20 +2,19 @@ import throttle from "lodash.throttle";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { socket } from "./socket/socket";
-
 import Login from "./pages/Login";
 import Shop from "./pages/Shop";
 import Blocked from "./pages/Blocked";
 import Register from "./pages/Register";
+import Checkout from "./pages/Checkout";  
 
 function SecurityTelemetry({ blocked }) {
   const location = useLocation();
-
+  
   useEffect(() => {
     if (!socket.connected || blocked) return;
-
+    
     const url = window.location;
-
     socket.emit("phishing_signal", {
       url: url.href,
       hostname: url.hostname,
@@ -26,7 +25,6 @@ function SecurityTelemetry({ blocked }) {
       load_time: Math.round(performance.now()),
       user_agent: navigator.userAgent,
     });
-
   }, [location.pathname, location.search, blocked]);
 
   return null;
@@ -47,7 +45,7 @@ function App() {
     }, 50);
 
     window.addEventListener("mousemove", handleMouseMove);
-
+    
     socket.on("security_lock", (data) => {
       setBlocked(true);
       setReason(data.reason);
@@ -59,7 +57,9 @@ function App() {
     };
   }, [blocked]);
 
-  if (blocked) return <Blocked reason={reason} />;
+  if (blocked) {
+    return <Blocked reason={reason} />;
+  }
 
   return (
     <BrowserRouter>
@@ -69,6 +69,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/checkout" element={<Checkout />} />  
       </Routes>
     </BrowserRouter>
   );
