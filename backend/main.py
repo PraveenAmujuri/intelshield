@@ -36,6 +36,11 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "intelshield_behavior_model.joblib")
 
+global ml_model
+global scaler
+
+ml_model, scaler = joblib.load(MODEL_PATH)
+
 print("🧠 ML Brain successfully loaded with scaler.")
 
 # ------------------ SESSION STATE ------------------
