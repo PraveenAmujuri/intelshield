@@ -19,6 +19,6 @@ user_collection = database["users_collection"]
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
-    bcrypt__backend="builtin",
-    bcrypt__truncate_error=True  # Tells the library: "Just truncate if it's long, don't crash"
+    bcrypt__backend="builtin",      # Forces the stable internal handler
+    bcrypt__truncate_error=False    # Prevents crash on passwords > 72 bytes
 )
