@@ -1,53 +1,64 @@
+import { ShieldCheck, AlertTriangle, CreditCard, ChevronLeft } from "lucide-react";
 import NavBar from "../components/NavBar";
 import { useCart } from "../contexts/CartContext";
 import { socket } from "../socket/socket";
 import { Link } from "react-router-dom";
 
 export default function Checkout() {
-  const { cartItems, totalPrice, totalItems } = useCart();
+  const { totalPrice, totalItems } = useCart();
 
   const handleHighRiskPurchase = () => {
     socket.emit("behavior_packet", {
       action: "FINAL_CHECKOUT_ATTEMPT",
       amount: totalPrice,
-      items: cartItems.length,
       timestamp: Date.now(),
-      metadata: { location: "checkout", device: navigator.userAgent }
     });
-    alert(`🛡️ IntelShield: HIGH-RISK ₹${totalPrice.toLocaleString()} DETECTED!`);
+    alert(`🚨 IntelShield: Transaction ₹${totalPrice.toLocaleString()} under review.`);
   };
 
   return (
     <>
       <NavBar />
-      <div className="pt-20 pb-16 px-4 min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-5xl font-black text-center mb-12 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent drop-shadow-2xl">
-            Secure Checkout
-          </h1>
-          <div className="bg-black/50 backdrop-blur-xl border border-white/20 rounded-3xl p-12 shadow-2xl space-y-8">
-            <div className="grid grid-cols-2 gap-8 text-center">
-              <div>
-                <div className="text-2xl text-gray-300 mb-2">Total Items</div>
-                <div className="text-4xl font-bold text-white">{totalItems}</div>
-              </div>
-              <div>
-                <div className="text-2xl text-gray-300 mb-2">Total Amount</div>
-                <div className="text-5xl font-black bg-gradient-to-r from-red-400 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl">
-                  ₹{totalPrice.toLocaleString()}
+      <div className="pt-32 pb-16 px-6 min-h-screen bg-[#030303] text-white">
+        <div className="max-w-xl mx-auto">
+          <Link to="/cart" className="flex items-center gap-2 text-gray-500 hover:text-white mb-8 transition-colors text-sm font-bold">
+            <ChevronLeft size={16} /> BACK TO CART
+          </Link>
+
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-[40px] p-12 shadow-2xl relative overflow-hidden">
+            {/* Security Pulse Decor */}
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+                <ShieldCheck size={120} />
+            </div>
+
+            <div className="relative z-10">
+              <h2 className="text-4xl font-black mb-2 tracking-tighter">Finalize <span className="text-purple-500">Node</span></h2>
+              <p className="text-gray-500 mb-10">All transactions are monitored by behavioral AI.</p>
+
+              <div className="space-y-6 mb-10 bg-white/5 p-8 rounded-3xl border border-white/5">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Batch Quantity</span>
+                  <span className="font-bold">{totalItems} Units</span>
+                </div>
+                <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                  <span className="text-gray-400">Total Credits</span>
+                  <span className="text-4xl font-black text-white">₹{totalPrice.toLocaleString()}</span>
                 </div>
               </div>
+
+              <button 
+                onClick={handleHighRiskPurchase} 
+                className="w-full bg-red-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-500 transition-all active:scale-95 shadow-lg shadow-red-900/20"
+              >
+                <AlertTriangle size={20} />
+                AUTHORIZE PAYMENT
+              </button>
+
+              <div className="mt-8 flex items-center gap-4 justify-center text-xs font-bold text-gray-600 uppercase tracking-widest">
+                <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-500"/> AES-256</span>
+                <span className="flex items-center gap-1"><CreditCard size={14} className="text-purple-500"/> SSL SECURE</span>
+              </div>
             </div>
-            <button onClick={handleHighRiskPurchase} className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-orange-600 hover:to-red-600 text-white font-black py-6 px-8 rounded-2xl shadow-2xl hover:shadow-red-500/50 hover:scale-105 transition-all duration-300 text-xl">
-              🚨 Confirm High-Risk Payment
-            </button>
-            <div className="p-6 bg-blue-500/20 border border-blue-500/30 rounded-2xl text-center">
-              <p className="text-blue-300 font-bold mb-2">🛡️ IntelShield Active</p>
-              <p className="text-blue-400 text-sm">Real-time ML threat detection</p>
-            </div>
-            <Link to="/cart" className="block w-full text-center bg-gray-700 hover:bg-gray-600 text-white py-4 px-8 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all">
-              ← Back to Cart
-            </Link>
           </div>
         </div>
       </div>
