@@ -58,7 +58,8 @@ async def disconnect(sid):
 @sio.event
 async def phishing_signal(sid, data):
     session = sessions.get(sid)
-    if not session: return
+    if not session: 
+        return
     
     risk = calculate_phishing_risk(data)
     session["phishing_risk"] += risk
@@ -96,14 +97,19 @@ async def behavior_packet(sid, data):
     elif action == "ADD_TO_CART":
         print(f"🛒 Cart add: {data.get('item_name')}")
 
+    elif action == "TEST_FRAUD":
+        print(f"🧪 MANUAL FRAUD TEST TRIGGERED!")
+
 # ------------------ MOUSE BEHAVIOR (Bot Detection) ------------------
 @sio.event
 async def mouse_move(sid, data):
     session = sessions.get(sid)
-    if not session: return
+    if not session: 
+        return
 
     session["coords"].append([data["x"], data["y"]])
-    if len(session["coords"]) < WINDOW: return
+    if len(session["coords"]) < WINDOW: 
+        return
 
     coords = np.array(session["coords"][-WINDOW:])
     dist = np.sqrt(np.sum(np.diff(coords, axis=0) ** 2, axis=1))
@@ -126,6 +132,7 @@ async def mouse_move(sid, data):
         feature_vector = intelshield_models['behavioral_scaler'].transform([[psi, jitter]])
         raw_score = intelshield_models['behavioral'].decision_function(feature_vector)[0]
     except Exception as e:
+        print(f"Behavioral model error: {e}")
         return
 
     if raw_score < -0.15:
@@ -160,4 +167,10 @@ async def threat_status(request: Request):
     return {
         "mouse_risk": session.get("risk", 0),
         "phishing_risk": session.get("phishing_risk", 0),
-        "total_risk": session.get("risk", 0) + session.get
+        "total_risk": session.get("risk", 0) + session.get("phishing_risk", 0),
+        "blocked": session.get("risk", 0) + session.get("phishing_risk", 0) > 7
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:sio_app", host="0.0.0.0", port=8000, reload=True)
