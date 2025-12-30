@@ -11,7 +11,11 @@ export default function Register() {
     e.preventDefault();
     try {
       // Sends data to your MongoDB-backed FastAPI route
-      await api.post("/auth/register", { username, password });
+      await api.post("/auth/login", {
+  username: email.trim(),
+  password: password.normalize("NFKC").trim()
+});
+
       alert("Account created in Cloud! Now Login.");
       navigate("/login");
     } catch (err) {

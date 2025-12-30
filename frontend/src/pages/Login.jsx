@@ -11,11 +11,11 @@ export default function Login() {
     e.preventDefault();
     try {
       // FIX: Change 'email' to 'username' to match Backend Pydantic model
-      const { data } = await api.post("/auth/login", { 
-        username: email, 
-        password: password 
-      });
-      
+      const { data } = await api.post("/auth/register", {
+  username: username.trim(),
+  password: password.normalize("NFKC").trim()
+});
+
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("username", email); // Store username for AI tracking
       navigate("/shop");
