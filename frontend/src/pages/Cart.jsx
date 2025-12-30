@@ -91,9 +91,10 @@ export default function CartPage() {  // ✅ PROPER EXPORT
           <div className="bg-black/60 backdrop-blur-xl border border-white/20 rounded-3xl p-8 max-w-2xl mx-auto shadow-2xl">
             <div className="flex justify-between items-center text-2xl mb-8">
               <span className="text-gray-300 font-semibold">Subtotal:</span>
-              <span className="font-black text-4xl bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent drop-shadow-2xl">
-                ${totalPrice.toLocaleString()}
-              </span>
+<span className="font-black text-4xl text-blue-400 drop-shadow-2xl">
+  ₹{(totalPrice || 0).toLocaleString()}
+</span>
+
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
