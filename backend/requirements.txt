@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-socketio
+motor
+passlib[bcrypt]
+certifi
+joblib
+numpy
+scikit-learn
