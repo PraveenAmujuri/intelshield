@@ -78,8 +78,8 @@ function AppContent() {
           <Route path="/shop" element={isAuthenticated ? <Shop /> : <Navigate to="/login" />} />
           <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Navigate to="/login" />} />
           <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" />} />
-          <Route path="/admin" element={isAuthenticated ? <Admin /> : <Navigate to="/login" />} />
-          
+          {/* <Route path="/admin" element={isAuthenticated ? <Admin /> : <Navigate to="/login" />} /> */}
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </main>

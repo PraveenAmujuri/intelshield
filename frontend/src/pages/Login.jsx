@@ -126,6 +126,12 @@ export default function Login() {
               Request credentials
             </Link>
           </p>
+          <p className="text-center mt-4 text-gray-600 relative z-10 text-[10px] uppercase tracking-widest font-bold">
+  System Operator?{" "}
+  <Link to="/admin" className="text-red-900/40 hover:text-red-500 transition-colors">
+    Admin Portal
+  </Link>
+</p>
         </div>
         {/* MAGIC SPOTLIGHT CARD END */}
         
