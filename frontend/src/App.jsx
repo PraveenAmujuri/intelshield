@@ -1,21 +1,19 @@
 import throttle from "lodash.throttle";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";  // ✅ SINGLE IMPORT
 import { useEffect, useState } from "react";
 import { socket } from "./socket/socket";
+import { CartProvider } from "./contexts/CartContext";  // ✅ NEW
 import Login from "./pages/Login";
 import Shop from "./pages/Shop";
 import Blocked from "./pages/Blocked";
 import Register from "./pages/Register";
-import Checkout from "./pages/Checkout";  
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CartProvider } from "./contexts/CartContext";
+import Checkout from "./pages/Checkout";
+import CartPage from "./pages/Cart";  // ✅ NEW Cart page
 
 function SecurityTelemetry({ blocked }) {
   const location = useLocation();
-  
   useEffect(() => {
     if (!socket.connected || blocked) return;
-    
     const url = window.location;
     socket.emit("phishing_signal", {
       url: url.href,
@@ -28,7 +26,6 @@ function SecurityTelemetry({ blocked }) {
       user_agent: navigator.userAgent,
     });
   }, [location.pathname, location.search, blocked]);
-
   return null;
 }
 
@@ -47,7 +44,6 @@ function App() {
     }, 50);
 
     window.addEventListener("mousemove", handleMouseMove);
-    
     socket.on("security_lock", (data) => {
       setBlocked(true);
       setReason(data.reason);
@@ -59,12 +55,10 @@ function App() {
     };
   }, [blocked]);
 
-  if (blocked) {
-    return <Blocked reason={reason} />;
-  }
+  if (blocked) return <Blocked reason={reason} />;
 
   return (
-    <CartProvider>
+    <CartProvider>  {/* ✅ WRAP EVERYTHING */}
       <BrowserRouter>
         <SecurityTelemetry blocked={blocked} />
         <Routes>
@@ -72,7 +66,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/cart" element={<CartPage />} />
+          <Route path="/cart" element={<CartPage />} />  {/* ✅ NEW */}
           <Route path="/checkout" element={<Checkout />} />
         </Routes>
       </BrowserRouter>
