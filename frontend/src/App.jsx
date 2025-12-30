@@ -1,5 +1,5 @@
 import throttle from "lodash.throttle";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { socket } from "./socket/socket";
 import { CartProvider } from "./contexts/CartContext";
@@ -30,13 +30,12 @@ function SecurityTelemetry({ blocked }) {
   return null;
 }
 
-// App.jsx - Update AppContent
 function AppContent() {
   const [blocked, setBlocked] = useState(false);
   const [reason, setReason] = useState("");
   const location = useLocation();
   
-  // Check for authentication
+  // ✅ Check if user is logged in
   const isAuthenticated = !!localStorage.getItem("token");
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/";
 
@@ -66,7 +65,7 @@ function AppContent() {
 
   return (
     <>
-      {/* ✅ Only show NavBar if logged in AND not on a login/register page */}
+      {/* ✅ Hide NavBar if not logged in OR if on a login/register page */}
       {isAuthenticated && !isAuthPage && <NavBar />}
       
       <main className="min-h-screen">
@@ -75,13 +74,13 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          {/* ✅ Protected Routes: Redirect to Login if no token */}
-          <Route path="/shop" element={isAuthenticated ? <Shop /> : <Login />} />
-          <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Login />} />
-          <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Login />} />
-          <Route path="/admin" element={isAuthenticated ? <Admin /> : <Login />} />
+          {/* ✅ Protected Routes: Redirect unauthorized users back to login */}
+          <Route path="/shop" element={isAuthenticated ? <Shop /> : <Navigate to="/login" />} />
+          <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Navigate to="/login" />} />
+          <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" />} />
+          <Route path="/admin" element={isAuthenticated ? <Admin /> : <Navigate to="/login" />} />
           
-          <Route path="*" element={<Login />} />
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </main>
     </>
@@ -91,7 +90,7 @@ function AppContent() {
 function App() {
   return (
     <CartProvider>
-      <Router>  {/* ✅ NO basename */}
+      <Router>
         <SecurityTelemetry blocked={false} />
         <AppContent />
       </Router>
