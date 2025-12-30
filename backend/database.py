@@ -4,18 +4,33 @@ import certifi
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 
+# Load environment variables
 load_dotenv()
 
-# 1. MongoDB Connection
+# Secure MongoDB URI
 MONGO_URI = os.getenv("MONGO_URI")
+
+if not MONGO_URI:
+    raise RuntimeError("❌ MONGO_URI is not set in environment variables")
+
 client = motor.motor_asyncio.AsyncIOMotorClient(
     MONGO_URI,
     tlsCAFile=certifi.where()
 )
+
 database = client["intelshield"]
 user_collection = database["users_collection"]
 
-# 2. ✅ FINAL RENDER FIX: Two-step initialization to bypass library bugs
-# This stops the KeyError: "keyword not supported by bcrypt handler: 'backend'"
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-pwd_context.update(bcrypt__backend="builtin", bcrypt__truncate_error=False)
+# Password hashing
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    truncate_error=False
+)
+
+def user_helper(user) -> dict:
+    return {
+        "id": str(user["_id"]),
+        "username": user["username"],
+        "is_blocked": user.get("is_blocked", False),
+    }
