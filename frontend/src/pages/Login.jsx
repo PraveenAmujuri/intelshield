@@ -1,17 +1,16 @@
 "use client"
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import api from "../api/axios";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { Lock } from "lucide-react"; // Vector icon for a cleaner look
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
-  // --- Magic Card Logic ---
+  // --- Magic Card Design Logic ---
   const gradientSize = 300;
   const mouseX = useMotionValue(-gradientSize);
   const mouseY = useMotionValue(-gradientSize);
@@ -35,9 +34,13 @@ export default function Login() {
         username: username.trim(),
         password: password.normalize("NFKC").trim()
       });
+
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("username", username);
-      navigate("/shop");
+      
+      // ✅ Use window.location.href to force the AppContent to re-render
+      // This ensures the NavBar and Protected Routes become visible immediately.
+      window.location.href = "/shop"; 
     } catch (err) {
       alert("Login Failed: Check credentials or block status");
     }
@@ -83,13 +86,13 @@ export default function Login() {
           />
 
           <div className="relative z-10 text-center mb-10">
-            <div className="w-20 h-20 bg-[#1f1f1f] border border-white/10 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-inner">
-              <span className="text-3xl">🔐</span>
+            <div className="w-20 h-20 bg-[#1f1f1f] border border-white/10 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-inner text-purple-500">
+              <Lock size={40} />
             </div>
             <h2 className="text-3xl font-bold text-white tracking-tight mb-2">
               IntelShield Login
             </h2>
-            <p className="text-gray-500">Secure Behavioral Sandbox</p>
+            <p className="text-gray-500 text-sm">Secure Behavioral Identity Terminal</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5 relative z-10">
@@ -111,15 +114,15 @@ export default function Login() {
             />
             <button
               type="submit"
-              className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-colors duration-200"
+              className="w-full h-14 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-purple-600 hover:text-white transition-all duration-200"
             >
               Access System →
             </button>
           </form>
 
-          <p className="text-center mt-8 text-gray-500 relative z-10">
+          <p className="text-center mt-8 text-gray-500 relative z-10 text-sm">
             Need access?{" "}
-            <Link to="/register" className="text-white hover:underline">
+            <Link to="/register" className="text-white hover:underline font-bold">
               Request credentials
             </Link>
           </p>
