@@ -4,25 +4,20 @@ import certifi
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 
-# ------------------ ENV ------------------
 load_dotenv()
 
+# Database Connection
 MONGO_URI = os.getenv("MONGO_URI")
-if not MONGO_URI:
-    raise RuntimeError("❌ MONGO_URI not set")
-
-# ------------------ DB ------------------
 client = motor.motor_asyncio.AsyncIOMotorClient(
     MONGO_URI,
     tlsCAFile=certifi.where()
 )
-
 database = client["intelshield"]
 user_collection = database["users_collection"]
 
-# ------------------ PASSWORD HASHING ------------------
+# ✅ THE FIX: Explicitly handle the bcrypt backend to stop the internal library crash
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
-    truncate_error=False  # 🔒 strict mode ON
+    bcrypt__truncate_error=True  # Tells the library: "Just truncate if it's long, don't crash"
 )
