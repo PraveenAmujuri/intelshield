@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 
 load_dotenv()
 
-# Database Connection
+# 1. MongoDB Connection
 MONGO_URI = os.getenv("MONGO_URI")
 client = motor.motor_asyncio.AsyncIOMotorClient(
     MONGO_URI,
@@ -15,10 +15,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
 database = client["intelshield"]
 user_collection = database["users_collection"]
 
-# ✅ THE FIX: Explicitly handle the bcrypt backend to stop the internal library crash
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__backend="builtin",      # Forces the stable internal handler
-    bcrypt__truncate_error=False    # Prevents crash on passwords > 72 bytes
-)
+# 2. ✅ FINAL RENDER FIX: Two-step initialization to bypass library bugs
+# This stops the KeyError: "keyword not supported by bcrypt handler: 'backend'"
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context.update(bcrypt__backend="builtin", bcrypt__truncate_error=False)
