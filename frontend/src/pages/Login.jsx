@@ -1,12 +1,33 @@
-import { useState } from "react";
+"use client"
+
+import React, { useState, useCallback, useEffect } from "react";
 import api from "../api/axios";
 import { useNavigate, Link } from "react-router-dom";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  // --- Magic Card Logic ---
+  const gradientSize = 300;
+  const mouseX = useMotionValue(-gradientSize);
+  const mouseY = useMotionValue(-gradientSize);
+
+  const handlePointerMove = useCallback((e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
+  }, [mouseX, mouseY]);
+
+  const reset = useCallback(() => {
+    mouseX.set(-gradientSize);
+    mouseY.set(-gradientSize);
+  }, [gradientSize, mouseX, mouseY]);
+
+  // --- Auth Logic ---
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -18,81 +39,93 @@ export default function Login() {
       localStorage.setItem("username", username);
       navigate("/shop");
     } catch (err) {
-      console.error(err.response?.data);
       alert("Login Failed: Check credentials or block status");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
+    <div className="min-h-screen flex items-center justify-center p-8 bg-[#030303]">
       <div className="max-w-md w-full mx-auto">
-        {/* MAGIC SPOTLIGHT CARD */}
-        <div className="group relative bg-black/60 backdrop-blur-xl border border-white/20 rounded-3xl p-10 shadow-2xl overflow-hidden
-          hover:before:absolute hover:before:inset-0 
-          hover:before:bg-gradient-to-r hover:before:from-blue-500/30 hover:before:to-purple-500/30 
-          hover:before:animate-pulse hover:before:rounded-3xl 
-          transition-all duration-500">
-          
-          {/* Glow border */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 
-            rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-          
+        
+        {/* MAGIC SPOTLIGHT CARD START */}
+        <div
+          className="group relative rounded-3xl bg-[#171717] border border-white/10 p-10 overflow-hidden"
+          onPointerMove={handlePointerMove}
+          onPointerLeave={reset}
+        >
+          {/* Spotlight Gradient Layer */}
+          <motion.div
+            className="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-500 opacity-0 group-hover:opacity-100"
+            style={{
+              background: useMotionTemplate`
+                radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px, 
+                rgba(158, 122, 255, 0.15), 
+                transparent 80%)
+              `,
+            }}
+          />
+
+          {/* Border Spotlight Layer */}
+          <motion.div
+            className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{
+              background: useMotionTemplate`
+                radial-gradient(${gradientSize / 2}px circle at ${mouseX}px ${mouseY}px, 
+                #9E7AFF, 
+                #FE8BBB, 
+                transparent 100%)
+              `,
+              padding: '1px',
+              mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              maskComposite: 'exclude',
+              WebkitMaskComposite: 'xor',
+            }}
+          />
+
           <div className="relative z-10 text-center mb-10">
-            <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl mb-6 
-              group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-              <span className="text-3xl drop-shadow-lg">🔐</span>
+            <div className="w-20 h-20 bg-[#1f1f1f] border border-white/10 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-inner">
+              <span className="text-3xl">🔐</span>
             </div>
-            <h2 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 
-              bg-clip-text text-transparent drop-shadow-2xl mb-2">
-              Login to Sandbox
+            <h2 className="text-3xl font-bold text-white tracking-tight mb-2">
+              IntelShield Login
             </h2>
+            <p className="text-gray-500">Secure Behavioral Sandbox</p>
           </div>
-          
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-6 py-4 bg-black/50 backdrop-blur-sm border border-white/30 rounded-2xl 
-                  text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-4 
-                  focus:ring-blue-500/20 transition-all duration-300 text-lg shadow-lg hover:shadow-blue-500/25"
-                required
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-6 py-4 bg-black/50 backdrop-blur-sm border border-white/30 rounded-2xl 
-                  text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-4 
-                  focus:ring-purple-500/20 transition-all duration-300 text-lg shadow-lg hover:shadow-purple-500/25"
-                required
-              />
-            </div>
+
+          <form onSubmit={handleLogin} className="space-y-5 relative z-10">
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-5 py-4 bg-[#0a0a0a] border border-white/5 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-5 py-4 bg-[#0a0a0a] border border-white/5 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+              required
+            />
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 hover:from-purple-600 
-                hover:to-blue-600 text-white font-black py-5 px-8 rounded-2xl shadow-2xl hover:shadow-purple-500/50 
-                hover:scale-[1.02] transform transition-all duration-300 text-xl border border-transparent 
-                hover:border-white/50 group relative overflow-hidden"
+              className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-colors duration-200"
             >
-              <span>Enter Sandbox →</span>
-              <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 rounded-2xl transition-transform origin-left duration-300" />
+              Access System →
             </button>
           </form>
-          
-          <p className="text-center mt-10 text-gray-400 text-lg">
-            New user?{" "}
-            <Link to="/register" className="text-blue-400 hover:text-blue-300 font-semibold underline 
-              decoration-2 hover:decoration-purple-400 hover:underline-offset-4 transition-all">
-              Create Account
+
+          <p className="text-center mt-8 text-gray-500 relative z-10">
+            Need access?{" "}
+            <Link to="/register" className="text-white hover:underline">
+              Request credentials
             </Link>
           </p>
         </div>
+        {/* MAGIC SPOTLIGHT CARD END */}
+        
       </div>
     </div>
   );
