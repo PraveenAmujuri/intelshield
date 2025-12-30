@@ -164,6 +164,24 @@ async def mouse_move(sid, data):
         }, room=sid)
     elif session["risk"] >= BOT_RISK_TRIGGER:
         print(f"⚠️ Suspicious automation | MouseRisk={session['risk']} | PhishingRisk={session['phishing_risk']} | Score={raw_score:.4f}")
+@app.get("/api/test/phishing")
+async def test_phishing():
+    return {"message": "🦠 Phishing test triggered - check socket logs", "risk": 5}
+
+@app.get("/api/test/fraud")
+async def test_fraud():
+    return {"message": "💳 Fraud test triggered - high-risk transaction", "score": -0.5}
+
+@app.get("/api/threat-status")
+async def threat_status():
+    sid = request.headers.get("x-socket-id", "unknown")
+    session = sessions.get(sid, {})
+    return {
+        "mouse_risk": session.get("risk", 0),
+        "phishing_risk": session.get("phishingrisk", 0),
+        "total_risk": session.get("risk", 0) + session.get("phishingrisk", 0),
+        "blocked": session.get("risk", 0) + session.get("phishingrisk", 0) > 7
+    }
 
 if __name__ == "__main__":
     import uvicorn
