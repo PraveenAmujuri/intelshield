@@ -28,7 +28,6 @@ export default function NavBar() {
               </span>
             )}
           </Link>
-            // Add this button in NavBar (after cart badge):
 {localStorage.getItem("admin_token") ? (
   <Link to="/admin" className="p-2 relative hover:bg-red-600/50 rounded-xl transition-all">
     <span className="text-xl">🔴</span>
