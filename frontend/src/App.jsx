@@ -36,12 +36,10 @@ function AppContent() {
   const [reason, setReason] = useState("");
   const location = useLocation();
   
-  // ✅ Define these correctly to avoid ReferenceErrors
+  // ✅ FIX: Define these variables at the top so they are available to Routes
   const isUser = !!localStorage.getItem("token");
   const isAdmin = !!localStorage.getItem("admin_token");
-  
-  // ✅ This defines the variable your Routes are looking for
-  const isAuthenticated = isUser || isAdmin;
+  const isAuthenticated = isUser || isAdmin; // This prevents the ReferenceError
   
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/";
 
@@ -65,7 +63,7 @@ function AppContent() {
       window.removeEventListener("mousemove", handleMouseMove);
       socket.off("security_lock");
     };
-  }, [blocked, blocked]);
+  }, [blocked]);
 
   if (blocked) return <Blocked reason={reason} />;
 
@@ -80,12 +78,12 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          {/* ✅ Now isAuthenticated is defined and works correctly */}
+          {/* ✅ Routes now use the defined isAuthenticated variable */}
           <Route path="/shop" element={isAuthenticated ? <Shop /> : <Navigate to="/login" />} />
           <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Navigate to="/login" />} />
           <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" />} />
           
-          {/* ✅ Public access to /admin as requested */}
+          {/* Public access to /admin as requested */}
           <Route path="/admin" element={<Admin />} />
           
           <Route path="*" element={<Navigate to="/login" />} />
