@@ -10,10 +10,12 @@ export default function Admin() {
   const [alerts, setAlerts] = useState([]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("admin_token"));
+  
+  // ✅ Force login every time the component loads (new tab)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState({});
 
-  // Magic Card Logic
+  // Magic Card Design Logic
   const gradientSize = 300;
   const mouseX = useMotionValue(-gradientSize);
   const mouseY = useMotionValue(-gradientSize);
@@ -48,13 +50,13 @@ export default function Admin() {
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     try {
+      // Calls your existing backend: @router.post("/admin-login")
       const { data } = await api.post("/auth/admin-login", { username, password });
+      
       localStorage.setItem("admin_token", data.access_token);
-      localStorage.setItem("username", "SYS_ADMIN"); // Set a display name
       setIsAuthenticated(true);
-      window.location.reload(); // Refresh to update NavBar
     } catch (err) {
-      alert("❌ Admin access denied");
+      alert("❌ Admin access denied: Incorrect credentials.");
     }
   };
 
@@ -92,7 +94,7 @@ export default function Admin() {
     <>
       <NavBar />
       <div className="pt-32 px-6 min-h-screen bg-[#030303] text-white">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto text-left">
           <div className="flex justify-between items-end mb-12">
             <div>
               <h1 className="text-5xl font-black tracking-tighter">System <span className="text-red-500">Overwatch</span></h1>
@@ -156,7 +158,7 @@ export default function Admin() {
                 </div>
               </div>
               <button 
-                onClick={() => { localStorage.clear(); window.location.href = "/login"; }}
+                onClick={() => { localStorage.removeItem("admin_token"); setIsAuthenticated(false); }}
                 className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-gray-400 font-bold hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest text-xs"
               >
                 Terminate Console

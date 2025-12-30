@@ -29,14 +29,16 @@ function SecurityTelemetry({ blocked }) {
   }, [location.pathname, location.search, blocked]);
   return null;
 }
-
+// App.jsx
 function AppContent() {
   const [blocked, setBlocked] = useState(false);
   const [reason, setReason] = useState("");
   const location = useLocation();
   
-  // ✅ Check if user is logged in
-  const isAuthenticated = !!localStorage.getItem("token");
+  // ✅ Separate authentication checks
+  const isUser = !!localStorage.getItem("token");
+  const isAdmin = !!localStorage.getItem("admin_token");
+  
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/";
 
   useEffect(() => {
@@ -65,23 +67,25 @@ function AppContent() {
 
   return (
     <>
-      {/* ✅ Hide NavBar if not logged in OR if on a login/register page */}
-      {isAuthenticated && !isAuthPage && <NavBar />}
+      {/* Show NavBar if either a user OR admin is logged in */}
+      {(isUser || isAdmin) && !isAuthPage && <NavBar />}
       
       <main className="min-h-screen">
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* ✅ Protected Routes: Redirect unauthorized users back to login */}
-          <Route path="/shop" element={isAuthenticated ? <Shop /> : <Navigate to="/login" />} />
-          <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Navigate to="/login" />} />
-          <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" />} />
-          {/* <Route path="/admin" element={isAuthenticated ? <Admin /> : <Navigate to="/login" />} /> */}
-          <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
+<Routes>
+  <Route path="/" element={<Login />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/register" element={<Register />} />
+  
+  {/* Standard User Routes */}
+  <Route path="/shop" element={isAuthenticated ? <Shop /> : <Navigate to="/login" />} />
+  <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Navigate to="/login" />} />
+  <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" />} />
+  
+  {/* ✅ Public access to /admin so Admin.jsx can handle its own login state */}
+  <Route path="/admin" element={<Admin />} />
+  
+  <Route path="*" element={<Navigate to="/login" />} />
+</Routes>
       </main>
     </>
   );
