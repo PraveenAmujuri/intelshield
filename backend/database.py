@@ -2,7 +2,8 @@ import os
 import motor.motor_asyncio
 import certifi
 from dotenv import load_dotenv
-from passlib.context import CryptContext
+import bcrypt  # 🔐 Direct bcrypt - no more passlib issues
+
 
 load_dotenv()
 
@@ -18,13 +19,22 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
 database = client["intelshield"]
 user_collection = database["users_collection"]
 
-# ✅ THE FIXED RENDER CONFIGURATION:
-# 1. Initialize with a clean context to avoid the 'backend' KeyError
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# 2. Use .update() to force the 'builtin' backend.
-# This bypasses the broken system 'bcrypt' library and silences version warnings.
-pwd_context.update(bcrypt__backend="builtin") 
+# -------- Password hashing helpers (bcrypt direct) --------
+def get_password_hash(password: str) -> str:
+    """Hash a plaintext password with bcrypt and return UTF-8 string."""
+    # ✅ Keep your 71-byte truncation for bcrypt safety
+    safe_password = password.encode('utf-8')[:71]
+    hashed = bcrypt.hashpw(safe_password, bcrypt.gensalt())
+    return hashed.decode("utf-8")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify plaintext against stored bcrypt hash."""
+    # ✅ Same truncation for consistency
+    safe_password = plain_password.encode('utf-8')[:71]
+    return bcrypt.checkpw(safe_password, hashed_password.encode("utf-8"))
+
 
 def user_helper(user) -> dict:
     return {

@@ -1,38 +1,38 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from database import user_collection, pwd_context
+from database import user_collection, get_password_hash, verify_password  # ✅ Updated imports
+
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
 
 class UserIn(BaseModel):
     username: str
     password: str
 
+
 @router.post("/register")
 async def register(user: UserIn):
-    # ✅ FIX: Pre-truncate to 71 bytes to satisfy Bcrypt and prevent library crashes
-    safe_password = user.password.encode('utf-8')[:71].decode('utf-8', 'ignore')
-
     existing = await user_collection.find_one({"username": user.username})
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    hashed = pwd_context.hash(safe_password)
+    # ✅ Uses the fixed get_password_hash() from database.py
+    hashed = get_password_hash(user.password)
+    
     await user_collection.insert_one({
         "username": user.username,
-        "password": hashed,
+        "password": hashed,  # ✅ Now stores bcrypt hash
         "is_blocked": False
     })
 
     return {"message": "User registered successfully"}
 
+
 @router.post("/login")
 async def login(user: UserIn):
-    # ✅ FIX: Use the same truncation for verification
-    safe_password = user.password.encode('utf-8')[:71].decode('utf-8', 'ignore')
-
     db_user = await user_collection.find_one({"username": user.username})
-    if not db_user or not pwd_context.verify(safe_password, db_user["password"]):
+    if not db_user or not verify_password(user.password, db_user["password"]):  # ✅ Fixed verify
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     if db_user.get("is_blocked"):
