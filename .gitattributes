@@ -1,0 +1,45 @@
+# ======================
+# LINE ENDINGS
+# ======================
+* text=auto
+
+# ======================
+# PYTHON
+# ======================
+*.py text eol=lf
+
+# ======================
+# JAVASCRIPT / REACT
+# ======================
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# ======================
+# CONFIG FILES
+# ======================
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.env.example text eol=lf
+
+# ======================
+# MARKDOWN / DOCS
+# ======================
+*.md text eol=lf
+
+# ======================
+# BINARY FILES
+# ======================
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+
+# ======================
+# PREVENT DIFF NOISE
+# ======================
+*.lock -text
