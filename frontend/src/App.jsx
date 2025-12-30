@@ -66,8 +66,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/cart" element={<CartPage />} />  {/* ✅ NEW */}
+          <Route path="/cart" element={<CartPage />} />  
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </BrowserRouter>
     </CartProvider>
