@@ -1,14 +1,16 @@
 import throttle from "lodash.throttle";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";  // ✅ SINGLE IMPORT
+import { BrowserRouter as Router, Routes, Route, useLocation, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { socket } from "./socket/socket";
-import { CartProvider } from "./contexts/CartContext";  // ✅ NEW
+import { CartProvider } from "./contexts/CartContext";
+import NavBar from "./components/NavBar";  // ✅ ADD
 import Login from "./pages/Login";
-import Shop from "./pages/Shop";
-import Blocked from "./pages/Blocked";
 import Register from "./pages/Register";
+import Shop from "./pages/Shop";
+import CartPage from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import CartPage from "./pages/Cart";  // ✅ NEW Cart page
+import Blocked from "./pages/Blocked";
+import Admin from "./pages/Admin";  // ✅ ADD
 
 function SecurityTelemetry({ blocked }) {
   const location = useLocation();
@@ -29,7 +31,7 @@ function SecurityTelemetry({ blocked }) {
   return null;
 }
 
-function App() {
+function AppContent() {
   const [blocked, setBlocked] = useState(false);
   const [reason, setReason] = useState("");
 
@@ -58,19 +60,29 @@ function App() {
   if (blocked) return <Blocked reason={reason} />;
 
   return (
-    <CartProvider>  {/* ✅ WRAP EVERYTHING */}
-      <BrowserRouter>
-        <SecurityTelemetry blocked={blocked} />
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/cart" element={<CartPage />} />  
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </BrowserRouter>
+    <>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<Login />} />
+      </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <CartProvider>
+      <Router>
+        <SecurityTelemetry blocked={false} />
+        <AppContent />
+      </Router>
     </CartProvider>
   );
 }
