@@ -30,9 +30,15 @@ function SecurityTelemetry({ blocked }) {
   return null;
 }
 
+// App.jsx - Update AppContent
 function AppContent() {
   const [blocked, setBlocked] = useState(false);
   const [reason, setReason] = useState("");
+  const location = useLocation();
+  
+  // Check for authentication
+  const isAuthenticated = !!localStorage.getItem("token");
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/";
 
   useEffect(() => {
     const handleMouseMove = throttle((e) => {
@@ -60,16 +66,21 @@ function AppContent() {
 
   return (
     <>
-      <NavBar />
+      {/* ✅ Only show NavBar if logged in AND not on a login/register page */}
+      {isAuthenticated && !isAuthPage && <NavBar />}
+      
       <main className="min-h-screen">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin" element={<Admin />} />
+          
+          {/* ✅ Protected Routes: Redirect to Login if no token */}
+          <Route path="/shop" element={isAuthenticated ? <Shop /> : <Login />} />
+          <Route path="/cart" element={isAuthenticated ? <CartPage /> : <Login />} />
+          <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Login />} />
+          <Route path="/admin" element={isAuthenticated ? <Admin /> : <Login />} />
+          
           <Route path="*" element={<Login />} />
         </Routes>
       </main>
