@@ -9,7 +9,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: '/', // ✅ Force root base
+  base: './',  // ✅ CRITICAL: ./ NOT /
   build: {
     outDir: 'dist',
     rollupOptions: {

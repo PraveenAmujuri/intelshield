@@ -1,5 +1,5 @@
 import throttle from "lodash.throttle";
-import { BrowserRouter as Router, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { socket } from "./socket/socket";
 import { CartProvider } from "./contexts/CartContext";
@@ -16,13 +16,12 @@ function SecurityTelemetry({ blocked }) {
   const location = useLocation();
   useEffect(() => {
     if (!socket.connected || blocked) return;
-    const url = window.location;
     socket.emit("phishing_signal", {
-      url: url.href,
-      hostname: url.hostname,
-      path_length: url.pathname.length + url.search.length,
-      has_at: url.href.includes("@"),
-      is_https: url.protocol === "https:",
+      url: window.location.href,
+      hostname: window.location.hostname,
+      path_length: window.location.pathname.length + window.location.search.length,
+      has_at: window.location.href.includes("@"),
+      is_https: window.location.protocol === "https:",
       referrer: document.referrer || "",
       load_time: Math.round(performance.now()),
       user_agent: navigator.userAgent,
@@ -71,7 +70,7 @@ function AppContent() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<Login />} /> {/* ✅ CATCH-ALL */}
+          <Route path="*" element={<Login />} />
         </Routes>
       </main>
     </>
@@ -81,7 +80,7 @@ function AppContent() {
 function App() {
   return (
     <CartProvider>
-      <Router basename={import.meta.env.DEV ? undefined : "/"}>
+      <Router>  {/* ✅ NO basename */}
         <SecurityTelemetry blocked={false} />
         <AppContent />
       </Router>
