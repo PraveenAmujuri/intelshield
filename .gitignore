@@ -18,7 +18,7 @@ dist/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
-*.joblib
+
 *.pkl
 *.h5
 *.onnx
