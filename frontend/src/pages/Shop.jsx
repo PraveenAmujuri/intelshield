@@ -1,35 +1,42 @@
-import NavBar from "../components/NavBar";
-import ProductCard from "../components/ProductCard";
+// Add this import at the top
+import { ShieldAlert, Zap, Globe } from "lucide-react";
 
-export default function Shop() {
-  const products = [
-    { id: 1, name: "Neural Chipset v2.0", price: "42,000", desc: "High-performance processing unit for edge computing and localized neural tasks." },
-    { id: 2, name: "Bio-Link Neural Implant", price: "1,15,000", desc: "Enterprise-grade neural interface designed for seamless hardware-to-cloud data transmission." },
-    { id: 3, name: "Quantum Firewall Node", price: "72,500", desc: "Hardware-level encryption node providing multi-layer packet filtering for secure networks." },
-    { id: 4, name: "AI Threat Scanner", price: "84,999", desc: "Advanced behavioral analysis unit for real-time identification of system anomalies." }
-  ];
+// Add this component inside your Shop function, above the products grid
+const SecurityTestPanel = () => {
+  const triggerPhishingTest = () => {
+    // Simulates a URL structure that triggers your phishing_engine.py
+    window.history.pushState({}, '', '/shop?verify_account=true&redirect=@external-node');
+    alert("Phishing Signal Sent: Check backend logs for risk score.");
+  };
+
+  const triggerBotVelocity = () => {
+    // Rapidly emits mouse movements to bypass throttle and test Isolation Forest
+    for (let i = 0; i < 50; i++) {
+      socket.emit("mouse_move", { x: Math.random(), y: Math.random() });
+    }
+    alert("Bot Velocity Test: If your AI threshold is tight, you may be blocked.");
+  };
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white">
-      <NavBar />
-      
-      <main className="relative pt-32 pb-20 px-6 max-w-7xl mx-auto">
-        <header className="mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-            Authorized <span className="text-purple-500">Hardware</span>
-          </h1>
-          <p className="text-gray-500 text-base md:text-lg max-w-2xl font-medium">
-            Procure validated components for your secure infrastructure. All units are shipped with pre-installed biometric verification.
-          </p>
-        </header>
-
-        {/* Grid uses grid-stretch to ensure all cards match height */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-          {products.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </main>
+    <div className="mb-12 p-6 rounded-2xl border border-purple-500/20 bg-purple-500/5 backdrop-blur-md">
+      <div className="flex items-center gap-2 mb-4 text-purple-400">
+        <ShieldAlert size={20} />
+        <h2 className="text-sm font-bold uppercase tracking-widest">Security Stress Testing</h2>
+      </div>
+      <div className="flex flex-wrap gap-4">
+        <button 
+          onClick={triggerBotVelocity}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg hover:bg-red-500/20 hover:border-red-500/50 transition-all text-sm font-medium"
+        >
+          <Zap size={16} className="text-yellow-500" /> Simulate Bot Velocity
+        </button>
+        <button 
+          onClick={triggerPhishingTest}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg hover:bg-blue-500/20 hover:border-blue-500/50 transition-all text-sm font-medium"
+        >
+          <Globe size={16} className="text-blue-500" /> Simulate Phishing URL
+        </button>
+      </div>
     </div>
   );
-}
+};
