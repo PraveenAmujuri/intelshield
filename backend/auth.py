@@ -34,6 +34,7 @@ async def register(user: UserIn):
         "password": hashed,
         "is_blocked": False
     })
+
     return {"message": "User registered"}
 
 @router.post("/login")
