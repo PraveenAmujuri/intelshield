@@ -31,7 +31,11 @@ app.add_middleware(
 sio_app = socketio.ASGIApp(sio, app)
 
 # ------------------ LOAD MODEL + SCALER ------------------
-ml_model, scaler = joblib.load(MODEL_PATH)
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "intelshield_behavior_model.joblib")
+
 print("🧠 ML Brain successfully loaded with scaler.")
 
 # ------------------ SESSION STATE ------------------
