@@ -46,10 +46,20 @@ async def login(user: UserIn):
         "access_token": "user_jwt_" + str(time.time()),  # Simple token
         "username": user.username
     }
+# ADD at top:
+from main import sessions  # ✅ Import sessions
+
+@router.get("/admin/alerts")
+async def get_admin_alerts():
+    return {
+        "alerts": [],
+        "active_sessions": len(sessions),  # ✅ Now works
+        "blocked_users": await user_collection.count_documents({"is_blocked": True})
+    }
 
 # ------------------ ADMIN AUTH ------------------
 ADMIN_CREDENTIALS = {
-    "admin": "admin1"  # Change this in production!
+    "admin": "intelshield2025"  # Change this in production!
 }
 
 @router.post("/admin-login")
